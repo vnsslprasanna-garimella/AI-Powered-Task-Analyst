@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0" />
+
+    <title>Create Assignment - SmartEval AI</title>
+
+    <link rel="preconnect"
+        href="https://fonts.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Inter', Arial, sans-serif;
+        }
+
+        body{
+            background:#0E1012;
+            color:white;
+            display:flex;
+            justify-content:center;
+            align-items:flex-start;
+            min-height:100vh;
+            padding:40px 20px;
+        }
+
+        .container{
+            width:100%;
+            max-width:700px;
+            background:#161A20;
+            padding:40px;
+            border-radius:20px;
+            box-shadow:0 0 20px rgba(0,0,0,0.4);
+        }
+
+        .top-bar{
+            display:flex;
+            align-items:center;
+            gap:16px;
+            margin-bottom:30px;
+        }
+
+        .back-btn{
+            background:transparent;
+            border:1px solid #333;
+            color:#aaa;
+            padding:8px 14px;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:13px;
+            transition:0.2s;
+        }
+
+        .back-btn:hover{
+            border-color:#D4AF37;
+            color:#D4AF37;
+        }
+
+        h1{
+            color:#D4AF37;
+            font-size:1.6rem;
+        }
+
+        .input-group{
+            margin-bottom:22px;
+        }
+
+        label{
+            display:block;
+            margin-bottom:8px;
+            font-size:14px;
+            color:#cccccc;
+        }
+
+        input,
+        textarea,
+        select{
+            width:100%;
+            padding:14px;
+            border:1px solid #2a2a2a;
+            border-radius:10px;
+            background:#0E1012;
+            color:white;
+            font-size:15px;
+            outline:none;
+            transition:border-color 0.2s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus{
+            border-color:#D4AF37;
+        }
+
+        textarea{
+            resize:vertical;
+            height:120px;
+        }
+
+        input[type="file"]{
+            padding:12px;
+            color:#999;
+            cursor:pointer;
+        }
+
+        select option{
+            background:#0E1012;
+        }
+
+        .submit-btn{
+            width:100%;
+            padding:15px;
+            border:none;
+            border-radius:12px;
+            background:#D4AF37;
+            color:black;
+            font-size:16px;
+            font-weight:bold;
+            cursor:pointer;
+            transition:opacity 0.2s, transform 0.2s;
+        }
+
+        .submit-btn:hover{
+            opacity:0.9;
+            transform:translateY(-2px);
+        }
+
+        .submit-btn:disabled{
+            opacity:0.5;
+            cursor:not-allowed;
+            transform:none;
+        }
+
+        .success-box{
+            margin-top:20px;
+            padding:18px;
+            background:#1D2A1D;
+            border-radius:12px;
+            color:#7CFC98;
+            display:none;
+            line-height:1.6;
+        }
+
+        .error-box{
+            margin-top:20px;
+            padding:18px;
+            background:#2A1D1D;
+            border-radius:12px;
+            color:#FC7C7C;
+            display:none;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="top-bar">
+
+            <button class="back-btn"
+                onclick="window.location.href='faculty-dashboard.html'">
+
+                ← Back
+
+            </button>
+
+            <h1>Create Assignment</h1>
+
+        </div>
+
+        <form id="assignmentForm">
+
+            <div class="input-group">
+
+                <label>Assignment Name *</label>
+
+                <input
+                    type="text"
+                    id="assignmentName"
+                    placeholder="e.g. AWS Deployment Task"
+                    required>
+
+            </div>
+
+            <div class="input-group">
+
+                <label>Assignment Description</label>
+
+                <textarea
+                    id="assignmentDescription"
+                    placeholder="Describe the assignment requirements and expected outcomes..."></textarea>
+
+            </div>
+
+            <div class="input-group">
+
+                <label>Deadline (Date & Time)</label>
+
+                <input
+                    type="datetime-local"
+                    id="deadline">
+
+            </div>
+
+            <div class="input-group">
+
+                <label>Upload Assignment PDF *</label>
+
+                <input
+                    type="file"
+                    id="assignmentPDF"
+                    accept=".pdf"
+                    required>
+
+            </div>
+
+            <div class="input-group">
+
+                <label>Difficulty Level</label>
+
+                <select id="difficulty">
+
+                    <option value="Easy">Easy</option>
+
+                    <option value="Medium" selected>
+                        Medium
+                    </option>
+
+                    <option value="Hard">Hard</option>
+
+                </select>
+
+            </div>
+
+            <button
+                type="submit"
+                class="submit-btn"
+                id="submitBtn">
+
+                Create Assignment
+
+            </button>
+
+        </form>
+
+        <div
+            class="success-box"
+            id="successBox"></div>
+
+        <div
+            class="error-box"
+            id="errorBox"></div>
+
+    </div>
+
+<script>
+
+const BASE_URL = "http://127.0.0.1:5000";
+
+
+// =========================================
+// CHECK LOGIN
+// =========================================
+
+const user =
+    JSON.parse(localStorage.getItem("smarteval_user"));
+
+if (!user || user.role !== "faculty") {
+
+    alert("Please login as faculty");
+
+    window.location.href = "login.html";
+}
+
+
+// =========================================
+// SET MIN DEADLINE TO NOW
+// =========================================
+
+(function setMinDeadline() {
+    const now = new Date();
+    // Format: YYYY-MM-DDTHH:MM
+    const pad = (n) => String(n).padStart(2, "0");
+    const minVal = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    document.getElementById("deadline").min = minVal;
+})();
+
+
+// =========================================
+// CREATE ASSIGNMENT
+// =========================================
+
+document.getElementById("assignmentForm")
+
+.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const submitBtn =
+        document.getElementById("submitBtn");
+
+    const successBox =
+        document.getElementById("successBox");
+
+    const errorBox =
+        document.getElementById("errorBox");
+
+    successBox.style.display = "none";
+
+    errorBox.style.display = "none";
+
+    const assignmentName =
+        document.getElementById("assignmentName").value.trim();
+
+    const assignmentDescription =
+        document.getElementById("assignmentDescription").value.trim();
+
+    const deadlineInput =
+        document.getElementById("deadline").value;
+
+    // Convert to ISO string so time is preserved
+    const deadline = deadlineInput
+        ? new Date(deadlineInput).toISOString()
+        : "";
+
+    const difficulty =
+        document.getElementById("difficulty").value;
+
+    const pdfFile =
+        document.getElementById("assignmentPDF").files[0];
+
+    if (!assignmentName || !pdfFile) {
+
+        errorBox.textContent =
+            "Please fill all required fields";
+
+        errorBox.style.display = "block";
+
+        return;
+    }
+
+    if (
+        !pdfFile.name
+        .toLowerCase()
+        .endsWith(".pdf")
+    ) {
+
+        errorBox.textContent =
+            "Only PDF files are allowed";
+
+        errorBox.style.display = "block";
+
+        return;
+    }
+
+    const formData = new FormData();
+
+    formData.append("faculty_id", user.id);
+
+    formData.append("title", assignmentName);
+
+    formData.append(
+        "description",
+        assignmentDescription
+    );
+
+    formData.append("deadline", deadline);
+
+    formData.append("difficulty", difficulty);
+
+    formData.append("pdf", pdfFile);
+
+    submitBtn.textContent = "Uploading...";
+
+    submitBtn.disabled = true;
+
+    try {
+
+        const response = await fetch(
+
+            `${BASE_URL}/create-assignment`,
+
+            {
+
+                method: "POST",
+
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            successBox.innerHTML = `
+
+                ✅ Assignment Created Successfully!
+
+                <br><br>
+
+                <strong>Assignment:</strong>
+                ${assignmentName}
+
+                <br>
+
+                <strong>Faculty:</strong>
+                ${user.name}
+
+                <br>
+
+                <strong>Difficulty:</strong>
+                ${difficulty}
+
+                <br>
+
+                <strong>Deadline:</strong>
+                ${deadline ? new Date(deadline).toLocaleString() : "No Deadline"}
+
+            `;
+
+            successBox.style.display = "block";
+
+            document.getElementById("assignmentForm")
+
+            .reset();
+
+        } else {
+
+            errorBox.textContent =
+                data.message;
+
+            errorBox.style.display = "block";
+        }
+
+    } catch(error) {
+
+        console.error(error);
+
+        errorBox.textContent =
+            "Backend connection failed";
+
+        errorBox.style.display = "block";
+
+    } finally {
+
+        submitBtn.textContent =
+            "Create Assignment";
+
+        submitBtn.disabled = false;
+    }
+});
+
+</script>
+
+</body>
+</html>

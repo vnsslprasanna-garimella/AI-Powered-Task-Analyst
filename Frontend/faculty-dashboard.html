@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Faculty Dashboard - SmartEval AI</title>
+
+    <link rel="preconnect"
+        href="https://fonts.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Inter', sans-serif;
+        }
+
+        body{
+            background:#0E1012;
+            color:white;
+            min-height:100vh;
+            padding:30px;
+        }
+
+        .topbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:30px;
+        }
+
+        .topbar h1{
+            color:#D4AF37;
+        }
+
+        .profile-section{
+            display:flex;
+            gap:12px;
+            align-items:center;
+        }
+
+        .profile-btn,
+        .logout-btn{
+            background:#161A20;
+            border:1px solid #333;
+            color:white;
+            padding:10px 16px;
+            border-radius:10px;
+            cursor:pointer;
+        }
+
+        .logout-btn:hover{
+            border-color:#D4AF37;
+            color:#D4AF37;
+        }
+
+        .actions{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+            gap:20px;
+            margin-bottom:30px;
+        }
+
+        .action-card{
+            background:#161A20;
+            padding:25px;
+            border-radius:20px;
+            cursor:pointer;
+            transition:0.2s;
+            border:1px solid transparent;
+        }
+
+        .action-card:hover{
+            border-color:#D4AF37;
+            transform:translateY(-3px);
+        }
+
+        .action-card h3{
+            color:#D4AF37;
+            margin-bottom:10px;
+        }
+
+        .section{
+            background:#161A20;
+            padding:25px;
+            border-radius:20px;
+            margin-bottom:30px;
+        }
+
+        .section h2{
+            color:#D4AF37;
+            margin-bottom:20px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th,
+        td{
+            padding:14px;
+            border-bottom:1px solid #2A2A2A;
+            text-align:left;
+        }
+
+        th{
+            color:#D4AF37;
+        }
+
+        .status{
+            padding:6px 12px;
+            border-radius:8px;
+            font-size:13px;
+            font-weight:600;
+        }
+
+        .completed{
+            background:#1D2A1D;
+            color:#7CFC98;
+        }
+
+        .pending{
+            background:#2C2412;
+            color:#FFD369;
+        }
+
+        .view-pdf-btn{
+            display:inline-block;
+            padding:6px 14px;
+            background:rgba(212,175,55,0.12);
+            border:1px solid rgba(212,175,55,0.4);
+            color:#D4AF37;
+            border-radius:8px;
+            font-size:13px;
+            font-weight:600;
+            text-decoration:none;
+            transition:0.2s;
+        }
+
+        .view-pdf-btn:hover{
+            background:rgba(212,175,55,0.25);
+            border-color:#D4AF37;
+        }
+
+        /* KPI CARDS */
+        .kpi-row{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+            gap:18px;
+            margin-bottom:30px;
+        }
+
+        .kpi-card{
+            background:#161A20;
+            border:1px solid #1E2530;
+            border-radius:16px;
+            padding:24px 28px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .kpi-card::before{
+            content:'';
+            position:absolute;
+            top:0; left:0; right:0;
+            height:3px;
+            background:linear-gradient(90deg, #D4AF37, #a8891f);
+            border-radius:16px 16px 0 0;
+        }
+
+        .kpi-label{
+            font-size:0.75rem;
+            font-weight:600;
+            color:#6B7280;
+            text-transform:uppercase;
+            letter-spacing:0.8px;
+            margin-bottom:10px;
+        }
+
+        .kpi-value{
+            font-size:2rem;
+            font-weight:800;
+            color:#D4AF37;
+            font-family:'Inter', sans-serif;
+            line-height:1;
+        }
+
+        .kpi-sub{
+            font-size:0.78rem;
+            color:#6B7280;
+            margin-top:6px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="topbar">
+
+    <h1>Faculty Dashboard</h1>
+
+    <div class="profile-section">
+
+        <button
+            class="profile-btn"
+            id="facultyProfileBtn">
+
+            Faculty
+
+        </button>
+
+        <button
+            class="logout-btn"
+            id="logoutBtn">
+
+            Logout
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================= -->
+<!-- KPI CARDS -->
+<!-- ======================================= -->
+
+<div class="kpi-row">
+
+    <div class="kpi-card">
+        <div class="kpi-label">Total Assignments</div>
+        <div class="kpi-value" id="kpiTotalAssignments">—</div>
+        <div class="kpi-sub">Created so far</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">Total Submissions</div>
+        <div class="kpi-value" id="kpiTotalSubmissions">—</div>
+        <div class="kpi-sub">Across all students</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">Avg Score</div>
+        <div class="kpi-value" id="kpiAvgScore">—</div>
+        <div class="kpi-sub">Across all evaluated submissions</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">Completion Rate</div>
+        <div class="kpi-value" id="kpiCompletionRate">—</div>
+        <div class="kpi-sub">Completed vs total submissions</div>
+    </div>
+
+</div>
+
+
+<!-- ======================================= -->
+<!-- ACTIONS -->
+<!-- ======================================= -->
+
+<div class="actions">
+
+    <div
+        class="action-card"
+        onclick="window.location.href='create-assignment.html'">
+
+        <h3>Create Assignment</h3>
+
+        <p>
+            Upload assignment PDFs and create tasks for students.
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- ======================================= -->
+<!-- ASSIGNMENTS -->
+<!-- ======================================= -->
+
+<div class="section">
+
+    <h2>Assignments</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Title</th>
+
+                <th>Difficulty</th>
+
+                <th>Deadline</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="assignmentsTableBody">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- ======================================= -->
+<!-- SUBMISSIONS -->
+<!-- ======================================= -->
+
+<div class="section">
+
+    <h2>Student Submissions</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Student</th>
+
+                <th>Assignment</th>
+
+                <th>Status</th>
+
+                <th>Submission PDF</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="submissionsTableBody">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script>
+
+const BASE_URL = "http://127.0.0.1:5000";
+
+
+// =========================================
+// CHECK LOGIN
+// =========================================
+
+const user =
+    JSON.parse(localStorage.getItem("smarteval_user"));
+
+if (!user || user.role !== "faculty") {
+
+    alert("Please login as faculty");
+
+    window.location.href = "login.html";
+}
+
+
+// =========================================
+// PROFILE NAME
+// =========================================
+
+document.getElementById("facultyProfileBtn")
+
+.textContent = user.name;
+
+
+// =========================================
+// LOGOUT
+// =========================================
+
+document.getElementById("logoutBtn")
+
+.addEventListener("click", () => {
+
+    localStorage.removeItem("smarteval_user");
+
+    window.location.href = "login.html";
+});
+
+
+// =========================================
+// LOAD ASSIGNMENTS
+// =========================================
+
+async function loadAssignments() {
+
+    try {
+
+        const response = await fetch(
+
+            `${BASE_URL}/get-assignments`
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            renderAssignments(data.assignments);
+
+            document.getElementById("kpiTotalAssignments").textContent =
+                data.assignments.length;
+        }
+
+    } catch(error) {
+
+        console.error(error);
+    }
+}
+
+
+// =========================================
+// RENDER ASSIGNMENTS
+// =========================================
+
+function renderAssignments(assignments) {
+
+    const tbody =
+        document.getElementById("assignmentsTableBody");
+
+    tbody.innerHTML = "";
+
+    assignments.forEach((assignment) => {
+
+        // Convert deadline to IST (UTC+5:30)
+        let deadlineDisplay = "No Deadline";
+
+        if (assignment.deadline) {
+
+            const date = new Date(assignment.deadline);
+
+            if (!isNaN(date.getTime())) {
+
+                deadlineDisplay = date.toLocaleString("en-IN", {
+                    timeZone: "Asia/Kolkata",
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true
+                }) + " IST";
+
+            } else {
+
+                deadlineDisplay = assignment.deadline;
+            }
+        }
+
+        tbody.innerHTML += `
+
+            <tr>
+
+                <td>${assignment.title}</td>
+
+                <td>${assignment.difficulty}</td>
+
+                <td>${deadlineDisplay}</td>
+
+            </tr>
+        `;
+    });
+}
+
+
+// =========================================
+// LOAD SUBMISSIONS
+// =========================================
+
+async function loadSubmissions() {
+
+    try {
+
+        const response = await fetch(
+
+            `${BASE_URL}/get-submissions`
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            renderSubmissions(data.submissions);
+
+            // KPI: total submissions
+            const total = data.submissions.length;
+            document.getElementById("kpiTotalSubmissions").textContent = total;
+
+            // KPI: completion rate
+            const completed = data.submissions.filter(
+                s => s.submission_status === "completed"
+            ).length;
+
+            document.getElementById("kpiCompletionRate").textContent =
+                total > 0
+                    ? Math.round((completed / total) * 100) + "%"
+                    : "0%";
+
+            // KPI: avg score — fetch from evaluation_results table
+            try {
+
+                const evalRes  = await fetch(`${BASE_URL}/get-evaluation-results`);
+                const evalData = await evalRes.json();
+                const results  = evalData.results || evalData.evaluation_results || [];
+
+                const scores = results
+                    .map(r => parseFloat(r.score ?? r.ai_score ?? r.total_score ?? ""))
+                    .filter(n => !isNaN(n));
+
+                if (scores.length > 0) {
+
+                    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+                    document.getElementById("kpiAvgScore").textContent =
+                        avg.toFixed(1) + " / 100";
+
+                } else {
+
+                    document.getElementById("kpiAvgScore").textContent = "N/A";
+                }
+
+            } catch(e) {
+
+                // Fallback: try score on submission object itself
+                const scored = data.submissions.filter(s =>
+                    s.score !== null && s.score !== undefined &&
+                    s.score !== "" && !isNaN(parseFloat(s.score))
+                );
+
+                if (scored.length > 0) {
+
+                    const avg = scored.reduce(
+                        (sum, s) => sum + parseFloat(s.score), 0
+                    ) / scored.length;
+
+                    document.getElementById("kpiAvgScore").textContent =
+                        avg.toFixed(1) + " / 100";
+
+                } else {
+
+                    document.getElementById("kpiAvgScore").textContent = "N/A";
+                }
+            }
+        }
+
+    } catch(error) {
+
+        console.error(error);
+    }
+}
+
+
+// =========================================
+// RENDER SUBMISSIONS
+// =========================================
+
+function renderSubmissions(submissions) {
+
+    const tbody =
+        document.getElementById("submissionsTableBody");
+
+    tbody.innerHTML = "";
+
+    submissions.forEach((submission) => {
+
+        const statusClass =
+            submission.submission_status === "completed"
+                ? "completed"
+                : "pending";
+
+        // Backend may return pdf url under different field names — check all
+        const pdfUrl =
+            submission.pdf_url ||
+            submission.submission_pdf ||
+            submission.pdf_s3_url ||
+            submission.s3_url ||
+            submission.file_url ||
+            null;
+
+        let pdfCell;
+
+        if (submission.submission_status === "completed" && pdfUrl) {
+
+            pdfCell = `<a href="${pdfUrl}" target="_blank" class="view-pdf-btn">View PDF</a>`;
+
+        } else if (submission.submission_status === "completed" && !pdfUrl) {
+
+            // Completed but no URL in response — show a note
+            pdfCell = `<span style="color:#888;font-size:13px;">PDF not linked</span>`;
+
+        } else {
+
+            pdfCell = `<span style="color:#555;font-size:13px;">Not submitted</span>`;
+        }
+
+        tbody.innerHTML += `
+
+            <tr>
+
+                <td>${submission.student_name}</td>
+
+                <td>${submission.assignment_title}</td>
+
+                <td>
+
+                    <span class="status ${statusClass}">
+
+                        ${submission.submission_status}
+
+                    </span>
+
+                </td>
+
+                <td>${pdfCell}</td>
+
+            </tr>
+        `;
+    });
+}
+
+
+// =========================================
+// INITIAL LOAD
+// =========================================
+
+loadAssignments();
+
+loadSubmissions();
+
+</script>
+
+</body>
+</html>

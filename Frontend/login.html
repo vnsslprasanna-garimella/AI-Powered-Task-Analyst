@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartEval AI - Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #D4AF37;
+      --bg: #0A0C0E;
+      --surface: #111418;
+      --surface2: #161B22;
+      --border: #1E2530;
+      --text: #E8EAF0;
+      --muted: #6B7280;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* LEFT PANEL */
+    .left-panel {
+      flex: 1;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      left: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(212,175,55,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 60px;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--gold); }
+
+    .brand-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+
+    .brand-title span { color: var(--gold); }
+
+    .brand-desc {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      max-width: 380px;
+      margin-bottom: 48px;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .feature-item::before {
+      content: '✓';
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* RIGHT PANEL */
+    .right-panel {
+      width: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 50px;
+      background: var(--bg);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    /* ROLE TOGGLE */
+    .role-toggle {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 30px;
+      gap: 4px;
+    }
+
+    .role-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .role-btn.active {
+      background: var(--gold);
+      color: #000;
+    }
+
+    /* FORM */
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: var(--gold);
+    }
+
+    .input-group input::placeholder { color: #3A4050; }
+
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .remember-me input[type="checkbox"] {
+      accent-color: var(--gold);
+      width: 14px;
+      height: 14px;
+    }
+
+    .forgot-link {
+      font-size: 0.85rem;
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .forgot-link:hover { text-decoration: underline; }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--gold);
+      color: #000;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-bottom: 20px;
+    }
+
+    .login-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .signup-text {
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .signup-text a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .signup-text a:hover { text-decoration: underline; }
+
+    .copyright {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 32px;
+    }
+
+    .error-box {
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: #2A1D1D;
+      color: #FC7C7C;
+      font-size: 0.875rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .left-panel { display: none; }
+      .right-panel { width: 100%; padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <a href="index.html" class="back-link">← Back to Home</a>
+    <div class="brand-title">SmartEval <span>AI</span></div>
+    <p class="brand-desc">
+      Intelligent assignment evaluation powered by AI-driven screenshot analysis, automated scoring, and modern academic workflows.
+    </p>
+    <div class="feature-list">
+      <div class="feature-item">AI-Powered Evaluation</div>
+      <div class="feature-item">Screenshot Analysis</div>
+      <div class="feature-item">Automated Feedback</div>
+      <div class="feature-item">Faculty &amp; Student Dashboard</div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="login-card">
+
+      <h2>Welcome Back</h2>
+      <p class="login-subtitle">Sign in to continue to SmartEval AI</p>
+
+      <!-- ROLE TOGGLE -->
+      <div class="role-toggle">
+        <button type="button" class="role-btn active" id="facultyBtn">Faculty</button>
+        <button type="button" class="role-btn" id="studentBtn">Student</button>
+      </div>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <form id="loginForm">
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" id="loginEmail" placeholder="Enter your email" required>
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required>
+        </div>
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox"> Remember me
+          </label>
+          <a href="#" class="forgot-link">Forgot Password?</a>
+        </div>
+        <button type="submit" class="login-btn">Login to Dashboard</button>
+      </form>
+
+      <div class="signup-text" id="signupContainer">
+        Don't have an account? <a href="signup.html">Create Account</a>
+      </div>
+
+      <p class="copyright">© 2026 SmartEval AI</p>
+    </div>
+  </div>
+
+  <script>
+  const BASE_URL = "http://127.0.0.1:5000";
+  let selectedRole = "faculty";
+
+  // ROLE TOGGLE
+  document.getElementById("facultyBtn").addEventListener("click", () => {
+    selectedRole = "faculty";
+    document.getElementById("facultyBtn").classList.add("active");
+    document.getElementById("studentBtn").classList.remove("active");
+    document.getElementById("signupContainer").style.display = "none";
+  });
+
+  document.getElementById("studentBtn").addEventListener("click", () => {
+    selectedRole = "student";
+    document.getElementById("studentBtn").classList.add("active");
+    document.getElementById("facultyBtn").classList.remove("active");
+    document.getElementById("signupContainer").style.display = "block";
+  });
+
+  // Hide signup link by default (faculty selected)
+  document.getElementById("signupContainer").style.display = "none";
+
+  // LOGIN
+  document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const email    = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+    const errorBox = document.getElementById("errorBox");
+    errorBox.style.display = "none";
+
+    try {
+      const response = await fetch(`${BASE_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+
+        // Role mismatch check
+        if (data.user.role !== selectedRole) {
+          errorBox.textContent = `This account is registered as "${data.user.role}". Please select the correct role tab above.`;
+          errorBox.style.display = "block";
+          return;
+        }
+
+        localStorage.setItem("smarteval_user", JSON.stringify(data.user));
+
+        if (data.user.role === "faculty") {
+          window.location.href = "faculty-dashboard.html";
+        } else {
+          window.location.href = "student-dashboard.html";
+        }
+
+      } else {
+        errorBox.textContent = data.message || "Login failed. Please check your credentials.";
+        errorBox.style.display = "block";
+      }
+
+    } catch(error) {
+      console.error(error);
+      errorBox.textContent = "Backend connection failed. Make sure Flask is running on port 5000.";
+      errorBox.style.display = "block";
+    }
+  });
+
+  // If already logged in, skip login
+  const existingUser = JSON.parse(localStorage.getItem("smarteval_user"));
+  if (existingUser) {
+    if (existingUser.role === "faculty") {
+      window.location.href = "faculty-dashboard.html";
+    } else {
+      window.location.href = "student-dashboard.html";
+    }
+  }
+  </script>
+
+</body>
+</html>

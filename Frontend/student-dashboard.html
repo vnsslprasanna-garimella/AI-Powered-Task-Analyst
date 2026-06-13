@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - SmartEval AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #D4AF37;
+      --bg: #0A0C0E;
+      --surface: #111418;
+      --surface2: #161B22;
+      --border: #1E2530;
+      --text: #E8EAF0;
+      --muted: #6B7280;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 36px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .topbar-brand { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; }
+    .topbar-brand span { color: var(--gold); }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .user-chip { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 10px; font-size: 0.875rem; font-weight: 500; }
+    .logout-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px 16px; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    .logout-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    .main { padding: 36px; max-width: 1200px; margin: 0 auto; }
+
+    .welcome-bar { margin-bottom: 32px; }
+    .welcome-bar h1 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+    .welcome-bar p { color: var(--muted); font-size: 0.9rem; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; margin-bottom: 36px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+    .stat-label { font-size: 0.8rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .stat-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--gold); }
+
+    .action-row { margin-bottom: 36px; }
+    .action-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; cursor: pointer; transition: border-color 0.2s, transform 0.2s; text-decoration: none; }
+    .action-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .action-card-info h3 { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
+    .action-card-info p { color: var(--muted); font-size: 0.875rem; }
+    .action-arrow { font-size: 1.4rem; color: var(--gold); }
+
+    .section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 28px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .section-header h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+    .badge { background: rgba(212,175,55,0.12); color: var(--gold); border: 1px solid rgba(212,175,55,0.25); padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 14px; font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    td { padding: 14px; font-size: 0.9rem; border-bottom: 1px solid rgba(30,37,48,0.6); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+
+    .difficulty-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .difficulty-easy { background: #1a2e1a; color: #7CFC98; }
+    .difficulty-medium { background: #2e2a1a; color: #FFD369; }
+    .difficulty-hard { background: #2e1a1a; color: #FC7C7C; }
+
+    .submit-btn-sm { background: var(--gold); color: #000; border: none; padding: 7px 16px; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: opacity 0.2s; }
+    .submit-btn-sm:hover { opacity: 0.85; }
+
+    .status-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .status-completed { background: #1D2A1D; color: #7CFC98; }
+    .status-pending   { background: #2C2412; color: #FFD369; }
+    .status-submitted { background: #1a2230; color: #7CC8FC; }
+
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 36px; width: 100%; max-width: 480px; }
+    .modal h3 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+    .modal p { color: var(--muted); font-size: 0.875rem; margin-bottom: 24px; }
+    .modal-label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+    .modal input[type="file"] { width: 100%; padding: 13px; border: 1px dashed var(--border); border-radius: 10px; background: var(--bg); color: var(--muted); font-size: 0.875rem; cursor: pointer; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 12px; }
+    .modal-submit { flex: 1; padding: 12px; border: none; border-radius: 10px; background: var(--gold); color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: opacity 0.2s; }
+    .modal-submit:hover { opacity: 0.88; }
+    .modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .modal-cancel { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--muted); font-size: 0.95rem; cursor: pointer; transition: border-color 0.2s; }
+    .modal-cancel:hover { border-color: var(--gold); }
+    .modal-msg { padding: 12px; border-radius: 8px; font-size: 0.875rem; margin-top: 14px; display: none; }
+    .modal-msg.success { background: #1D2A1D; color: #7CFC98; }
+    .modal-msg.error   { background: #2A1D1D; color: #FC7C7C; }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-brand">SmartEval <span>AI</span></div>
+    <div class="topbar-right">
+      <div class="user-chip" id="userChip">Student</div>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="welcome-bar">
+      <h1>Welcome back, <span id="studentName" style="color:var(--gold)">Student</span> 👋</h1>
+      <p>View your assignments and submit your work below.</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Assignments</div>
+        <div class="stat-value" id="totalAssignments">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">My Submissions</div>
+        <div class="stat-value" id="totalSubmissions">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Branch</div>
+        <div class="stat-value" style="font-size:1.2rem; padding-top:6px;" id="studentBranch">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">My Avg Score</div>
+        <div class="stat-value" id="avgScore">—</div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <a href="upload-test.html" class="action-card">
+        <div class="action-card-info">
+          <h3>AI Evaluation Tool</h3>
+          <p>Upload a PDF submission for instant AI-powered evaluation and scoring</p>
+        </div>
+        <div class="action-arrow">→</div>
+      </a>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <h2>Available Assignments</h2>
+        <span class="badge" id="assignmentsBadge">Loading...</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Faculty</th>
+            <th>Difficulty</th>
+            <th>Deadline</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="assignmentsBody">
+          <tr><td colspan="5"><div class="empty-state"><div class="icon">⏳</div><p>Loading assignments...</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <h2>My Submissions</h2>
+        <span class="badge" id="submissionsBadge">Loading...</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Assignment</th>
+            <th>Submitted At</th>
+            <th>Status</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="submissionsBody">
+          <tr><td colspan="3"><div class="empty-state"><div class="icon">⏳</div><p>Loading submissions...</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- SUBMIT MODAL -->
+  <div class="modal-overlay" id="submitModal">
+    <div class="modal">
+      <h3>Submit Assignment</h3>
+      <p id="modalAssignmentTitle">Upload your PDF for this assignment.</p>
+      <label class="modal-label">Select PDF File *</label>
+      <input type="file" id="submissionPdf" accept=".pdf">
+      <div class="modal-actions">
+        <button class="modal-cancel" id="modalCancel">Cancel</button>
+        <button class="modal-submit" id="modalSubmit">Upload Submission</button>
+      </div>
+      <div class="modal-msg" id="modalMsg"></div>
+    </div>
+  </div>
+
+  <script>
+  const BASE_URL = "http://127.0.0.1:5000";
+
+  const user = JSON.parse(localStorage.getItem("smarteval_user"));
+
+  if (!user || user.role !== "student") {
+    alert("Please login as a student.");
+    window.location.href = "login.html";
+  } else {
+
+    document.getElementById("studentName").textContent  = user.name;
+    document.getElementById("userChip").textContent     = user.name;
+    document.getElementById("studentBranch").textContent = user.branch || "N/A";
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("smarteval_user");
+      window.location.href = "login.html";
+    });
+
+    async function loadAssignments() {
+      try {
+        const res  = await fetch(`${BASE_URL}/get-assignments`);
+        const data = await res.json();
+        const assignments = data.assignments || [];
+
+        document.getElementById("totalAssignments").textContent = assignments.length;
+        document.getElementById("assignmentsBadge").textContent = assignments.length + " available";
+
+        const tbody = document.getElementById("assignmentsBody");
+
+        if (assignments.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">📭</div><p>No assignments yet.</p></div></td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = assignments.map(a => {
+          const diffClass = "difficulty-" + (a.difficulty || "medium").toLowerCase();
+          const deadline  = a.deadline ? new Date(a.deadline).toLocaleDateString() : "No Deadline";
+          const safeTitle = (a.title || "").replace(/'/g, "\\'");
+          return `<tr>
+            <td><strong>${a.title}</strong></td>
+            <td style="color:var(--muted)">${a.faculty_name || "—"}</td>
+            <td><span class="difficulty-badge ${diffClass}">${a.difficulty || "Medium"}</span></td>
+            <td style="color:var(--muted)">${deadline}</td>
+            <td><button class="submit-btn-sm" onclick="openSubmitModal(${a.id}, '${safeTitle}')">Submit</button></td>
+          </tr>`;
+        }).join("");
+
+      } catch(err) {
+        console.error(err);
+        document.getElementById("assignmentsBody").innerHTML =
+          `<tr><td colspan="5"><div class="empty-state"><div class="icon">⚠️</div><p>Could not load assignments. Is the backend running?</p></div></td></tr>`;
+      }
+    }
+
+    async function loadSubmissions() {
+      try {
+        const res  = await fetch(`${BASE_URL}/get-submissions`);
+        const data = await res.json();
+        const all  = data.submissions || [];
+        const mine = all.filter(s => s.student_name === user.name);
+
+        document.getElementById("totalSubmissions").textContent = mine.length;
+        document.getElementById("submissionsBadge").textContent = mine.length + " submitted";
+
+        // ── Fetch evaluation_results to get scores ──────────────────
+        // Build a map: submission_id → score from evaluation_results table
+        let evalScoreMap = {};
+        try {
+            const evalRes  = await fetch(`${BASE_URL}/get-evaluation-results`);
+            const evalData = await evalRes.json();
+            const results  = evalData.results || evalData.evaluation_results || [];
+            results.forEach(r => {
+                const sid   = r.submission_id;
+                const score = parseFloat(r.score ?? r.ai_score ?? r.total_score ?? "");
+                if (sid && !isNaN(score)) {
+                    // Keep highest score if multiple entries per submission
+                    if (evalScoreMap[sid] === undefined || score > evalScoreMap[sid]) {
+                        evalScoreMap[sid] = score;
+                    }
+                }
+            });
+        } catch(e) {
+            // Endpoint may not exist yet — silently continue, scores stay empty
+            console.warn("Could not fetch evaluation results:", e);
+        }
+
+        // Helper: get score for a submission — check evalScoreMap first, then submission fields
+        const getScore = (s) => {
+            // Priority 1: evaluation_results table (most accurate)
+            if (evalScoreMap[s.id] !== undefined) return evalScoreMap[s.id];
+            // Priority 2: score already on submission object (some backends join it)
+            const raw = s.score ?? s.ai_score ?? s.total_score ?? s.marks ?? null;
+            if (raw === null || raw === "" || raw === undefined) return null;
+            const num = parseFloat(raw);
+            return isNaN(num) ? null : num;
+        };
+
+        // ── Avg Score KPI ───────────────────────────────────────────
+        const scored = mine.filter(s => getScore(s) !== null);
+        if (scored.length > 0) {
+            const avg = scored.reduce((sum, s) => sum + getScore(s), 0) / scored.length;
+            document.getElementById("avgScore").textContent = avg.toFixed(1) + "%";
+        } else {
+            document.getElementById("avgScore").textContent = "N/A";
+        }
+
+        const tbody = document.getElementById("submissionsBody");
+
+        if (mine.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="icon">📝</div><p>No submissions yet.</p></div></td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = mine.map(s => {
+          const status   = s.submission_status || "pending";
+          const date     = s.submitted_at ? new Date(s.submitted_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "—";
+          const scoreNum = getScore(s);
+          const scoreVal = scoreNum !== null
+            ? `<span style="color:var(--gold);font-weight:700;">${scoreNum.toFixed(1)} / 100</span>`
+            : `<span style="color:var(--muted);font-size:0.85rem;">Pending</span>`;
+          return `<tr>
+            <td><strong>${s.assignment_title}</strong></td>
+            <td style="color:var(--muted)">${date}</td>
+            <td><span class="status-pill status-${status}">${status}</span></td>
+            <td>${scoreVal}</td>
+          </tr>`;
+        }).join("");
+
+      } catch(err) {
+        console.error(err);
+        document.getElementById("submissionsBody").innerHTML =
+          `<tr><td colspan="4"><div class="empty-state"><div class="icon">⚠️</div><p>Could not load submissions.</p></div></td></tr>`;
+      }
+    }
+
+    let activeAssignmentId = null;
+
+    window.openSubmitModal = function(assignmentId, assignmentTitle) {
+      activeAssignmentId = assignmentId;
+      document.getElementById("modalAssignmentTitle").textContent = `Submitting for: "${assignmentTitle}"`;
+      document.getElementById("submissionPdf").value = "";
+      document.getElementById("modalMsg").style.display = "none";
+      document.getElementById("modalSubmit").textContent = "Upload Submission";
+      document.getElementById("modalSubmit").disabled = false;
+      document.getElementById("submitModal").classList.add("open");
+    };
+
+    document.getElementById("modalCancel").addEventListener("click", () => {
+      document.getElementById("submitModal").classList.remove("open");
+    });
+
+    document.getElementById("modalSubmit").addEventListener("click", async () => {
+      const pdfFile = document.getElementById("submissionPdf").files[0];
+      const msgBox  = document.getElementById("modalMsg");
+      const btn     = document.getElementById("modalSubmit");
+
+      msgBox.style.display = "none";
+
+      if (!pdfFile) {
+        msgBox.textContent = "Please select a PDF file.";
+        msgBox.className   = "modal-msg error";
+        msgBox.style.display = "block";
+        return;
+      }
+
+      if (!pdfFile.name.toLowerCase().endsWith(".pdf")) {
+        msgBox.textContent = "Only PDF files are allowed.";
+        msgBox.className   = "modal-msg error";
+        msgBox.style.display = "block";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("assignment_id", activeAssignmentId);
+      formData.append("student_id", user.id);
+      formData.append("pdf", pdfFile);
+
+      btn.textContent = "Uploading...";
+      btn.disabled    = true;
+
+      try {
+        const res  = await fetch(`${BASE_URL}/upload-submission`, { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+          msgBox.textContent   = "✅ Submitted successfully!";
+          msgBox.className     = "modal-msg success";
+          msgBox.style.display = "block";
+          setTimeout(() => {
+            document.getElementById("submitModal").classList.remove("open");
+            loadSubmissions();
+          }, 1500);
+        } else {
+          msgBox.textContent   = data.message || "Submission failed.";
+          msgBox.className     = "modal-msg error";
+          msgBox.style.display = "block";
+          btn.textContent = "Upload Submission";
+          btn.disabled    = false;
+        }
+      } catch(err) {
+        console.error(err);
+        msgBox.textContent   = "Backend connection failed.";
+        msgBox.className     = "modal-msg error";
+        msgBox.style.display = "block";
+        btn.textContent = "Upload Submission";
+        btn.disabled    = false;
+      }
+    });
+
+    loadAssignments();
+    loadSubmissions();
+  }
+  </script>
+
+</body>
+</html>

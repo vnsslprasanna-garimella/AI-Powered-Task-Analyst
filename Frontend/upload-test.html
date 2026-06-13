@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartEval AI — Evaluate Submission</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold:#D4AF37; --gold-light:#E8C84A; --gold-dim:rgba(212,175,55,0.10); --gold-border:rgba(212,175,55,0.20);
+      --bg:#0C0D0F; --bg2:#101214; --surface:#141618; --surface2:#1A1C1F;
+      --border:#232629; --border2:#2A2D32;
+      --text:#F0F1F3; --text2:#9AA0AA; --text3:#5C6370;
+      --ok-bg:#0E1F12; --ok-fg:#4ADE80; --err-bg:#1F0E0E; --err-fg:#F87171;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Mulish',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+
+    /* TOPBAR */
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:58px;background:var(--surface);border-bottom:1px solid var(--border);}
+    .brand{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+    .brand-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;}
+    .back-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Outfit',sans-serif;font-size:0.8rem;font-weight:600;color:var(--text3);text-decoration:none;padding:6px 13px;border:1px solid var(--border2);border-radius:8px;transition:border-color .15s,color .15s;}
+    .back-btn:hover{border-color:var(--gold-border);color:var(--gold);}
+
+    /* PAGE */
+    .page{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:48px 20px 60px;}
+    .container{width:100%;max-width:680px;}
+
+    /* HEADER */
+    .page-header{margin-bottom:32px;}
+    .page-tag{display:inline-flex;align-items:center;gap:6px;font-family:'Outfit',sans-serif;font-size:0.72rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+    .page-tag::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%;}
+    .page-header h1{font-family:'Outfit',sans-serif;font-size:1.75rem;font-weight:800;color:var(--text);letter-spacing:-0.5px;margin-bottom:6px;}
+    .page-header p{color:var(--text3);font-size:0.875rem;}
+
+    /* CARD */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px;}
+    .card-title{font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+
+    /* FIELDS */
+    .field{margin-bottom:20px;} .field:last-of-type{margin-bottom:0;}
+    .field label{display:block;font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;}
+    .sel{width:100%;padding:11px 36px 11px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'Mulish',sans-serif;font-size:0.9rem;outline:none;appearance:none;cursor:pointer;transition:border-color .15s,box-shadow .15s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath fill='none' stroke='%235C6370' stroke-width='1.5' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;}
+    .sel:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.08);}
+    .sel option{background:#1A1C1F;}
+
+    /* ASSIGNMENT INFO */
+    .ainfo{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:10px;display:none;}
+    .ainfo.show{display:block;}
+    .ainfo-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;font-size:0.82rem;}
+    .ainfo-row:last-child{margin-bottom:0;}
+    .alabel{font-family:'Outfit',sans-serif;font-size:0.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;}
+    .avalue{color:var(--text2);font-weight:600;}
+    .diff{display:inline-block;padding:2px 9px;border-radius:100px;font-size:0.72rem;font-weight:700;font-family:'Outfit',sans-serif;}
+    .diff-easy{background:#0E1F12;color:#4ADE80;} .diff-medium{background:#1F1A0E;color:#FBB040;} .diff-hard{background:#1F0E0E;color:#F87171;}
+    .adesc{font-size:0.82rem;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);line-height:1.6;}
+
+    /* DROP ZONE */
+    .drop-zone{width:100%;padding:28px 20px;background:var(--bg2);border:1.5px dashed var(--border2);border-radius:12px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;position:relative;}
+    .drop-zone:hover,.drop-zone.over{border-color:var(--gold);background:rgba(212,175,55,.03);}
+    .drop-zone input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+    .drop-icon{font-size:1.8rem;margin-bottom:8px;}
+    .drop-text{font-size:0.875rem;color:var(--text3);font-weight:500;}
+    .drop-text strong{color:var(--gold);font-family:'Outfit',sans-serif;}
+    .file-name{font-size:0.82rem;color:var(--ok-fg);margin-top:8px;font-weight:700;font-family:'Outfit',sans-serif;display:none;}
+
+    /* BUTTON */
+    .submit-btn{width:100%;padding:13px;background:var(--gold);color:#000;border:none;border-radius:11px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;transition:background .15s,transform .15s,box-shadow .15s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .submit-btn:hover:not(:disabled){background:var(--gold-light);transform:translateY(-1px);box-shadow:0 6px 20px rgba(212,175,55,.2);}
+    .submit-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+    .try-again{background:var(--surface2);color:var(--text2);border:1px solid var(--border2);margin-top:12px;}
+    .try-again:hover:not(:disabled){background:var(--surface2);border-color:var(--gold-border);color:var(--gold);transform:none;box-shadow:none;}
+
+    /* PROGRESS */
+    .progress-card{display:none;} .progress-card.show{display:block;}
+    .steps{display:flex;flex-direction:column;}
+    .step{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+    .step:last-child{border-bottom:none;}
+    .sicon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.82rem;flex-shrink:0;transition:all .3s;}
+    .sicon.idle{background:var(--surface2);color:var(--text3);border:1px solid var(--border2);}
+    .sicon.active{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-border);}
+    .sicon.done{background:var(--ok-bg);color:var(--ok-fg);border:1px solid rgba(74,222,128,.15);}
+    .sicon.err{background:var(--err-bg);color:var(--err-fg);border:1px solid rgba(248,113,113,.15);}
+    .scontent h4{font-family:'Outfit',sans-serif;font-size:0.875rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+    .scontent p{font-size:0.8rem;color:var(--text3);}
+
+    /* RESULT */
+    .result-card{display:none;} .result-card.show{display:block;}
+    .result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+    .result-header h2{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;}
+    .score-chip{background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;padding:5px 16px;border-radius:100px;}
+    .result-body{font-size:0.875rem;color:var(--text2);line-height:1.8;white-space:pre-wrap;word-break:break-word;}
+    .result-actions{display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+    .btn-outline{flex:1;padding:10px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--text2);font-family:'Outfit',sans-serif;font-weight:600;font-size:0.82rem;cursor:pointer;transition:border-color .15s,color .15s;}
+    .btn-outline:hover{border-color:var(--gold-border);color:var(--gold);}
+
+    /* ERROR */
+    .err-card{display:none;} .err-card.show{display:block;}
+    .err-inner{background:var(--err-bg);border:1px solid rgba(248,113,113,.15);border-radius:12px;padding:24px;text-align:center;}
+    .err-inner .eicon{font-size:1.6rem;margin-bottom:10px;}
+    .err-inner h4{font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:700;color:var(--err-fg);margin-bottom:4px;}
+    .err-inner p{font-size:0.82rem;color:var(--text3);line-height:1.6;}
+
+    @media(max-width:600px){.topbar{padding:0 18px;}.page{padding:28px 14px 40px;}}
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand"><span class="brand-dot"></span>SmartEval AI</div>
+    <a href="student-dashboard.html" class="back-btn">← Dashboard</a>
+  </div>
+
+  <div class="page">
+    <div class="container">
+
+      <div class="page-header">
+        <div class="page-tag">AI Evaluation</div>
+        <h1>Submit &amp; Evaluate</h1>
+        <p>Select your assignment, upload your PDF, and get instant AI feedback saved to database</p>
+      </div>
+
+      <!-- FORM CARD -->
+      <div class="card" id="formCard">
+        <div class="card-title">Step 1 — Select Assignment</div>
+
+        <div class="field">
+          <label>Assignment</label>
+          <select class="sel" id="assignmentSelect">
+            <option value="">Loading assignments...</option>
+          </select>
+        </div>
+
+        <div class="ainfo" id="ainfo">
+          <div class="ainfo-row">
+            <span class="alabel">Faculty</span>
+            <span class="avalue" id="aFaculty">—</span>
+          </div>
+          <div class="ainfo-row">
+            <span class="alabel">Deadline</span>
+            <span class="avalue" id="aDeadline">—</span>
+          </div>
+          <div class="ainfo-row">
+            <span class="alabel">Difficulty</span>
+            <span id="aDiff">—</span>
+          </div>
+          <div class="adesc" id="aDesc">—</div>
+        </div>
+
+        <div style="margin-top:22px;" class="card-title">Step 2 — Upload Your PDF</div>
+
+        <div class="field">
+          <label>Submission File</label>
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="pdfFile" accept=".pdf">
+            <div class="drop-icon">📄</div>
+            <div class="drop-text">Drag &amp; drop or <strong>click to browse</strong></div>
+            <div class="file-name" id="fileName"></div>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="startEval()">
+          Evaluate with AI &nbsp;→
+        </button>
+      </div>
+
+      <!-- PROGRESS CARD -->
+      <div class="card progress-card" id="progressCard">
+        <div class="card-title">Processing your submission</div>
+        <div class="steps">
+          <div class="step">
+            <div class="sicon idle" id="s1">1</div>
+            <div class="scontent"><h4>Uploading PDF</h4><p id="s1t">Sending your submission to the server</p></div>
+          </div>
+          <div class="step">
+            <div class="sicon idle" id="s2">2</div>
+            <div class="scontent"><h4>Extracting Content</h4><p id="s2t">Converting PDF pages to images</p></div>
+          </div>
+          <div class="step">
+            <div class="sicon idle" id="s3">3</div>
+            <div class="scontent"><h4>AI Evaluation</h4><p id="s3t">Gemini AI is analysing your work (20–60 sec)</p></div>
+          </div>
+          <div class="step">
+            <div class="sicon idle" id="s4">4</div>
+            <div class="scontent"><h4>Saving Results</h4><p id="s4t">Storing evaluation in database</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ERROR CARD -->
+      <div class="card err-card" id="errCard">
+        <div class="err-inner">
+          <div class="eicon">⚠️</div>
+          <h4 id="errTitle">Something went wrong</h4>
+          <p id="errMsg">Make sure the Flask backend is running: <strong>python app.py</strong></p>
+        </div>
+        <button class="submit-btn try-again" onclick="resetForm()">← Try Again</button>
+      </div>
+
+      <!-- RESULT CARD -->
+      <div class="card result-card" id="resultCard">
+        <div class="result-header">
+          <h2>🎓 AI Evaluation Result</h2>
+          <span class="score-chip" id="scoreChip">Evaluated ✓</span>
+        </div>
+        <div class="result-body" id="resultBody"></div>
+        <div class="result-actions">
+          <button class="btn-outline" onclick="resetForm()">Evaluate Another</button>
+          <button class="btn-outline" onclick="window.location.href='student-dashboard.html'">Back to Dashboard</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+const BASE_URL = "http://127.0.0.1:5000";
+
+// Auth
+const user = JSON.parse(localStorage.getItem("smarteval_user"));
+if (!user) { window.location.href = "login.html"; }
+
+let assignments = [];
+
+// Load assignments
+async function loadAssignments() {
+  try {
+    const r = await fetch(`${BASE_URL}/get-assignments`);
+    const d = await r.json();
+    assignments = d.assignments || [];
+    const sel = document.getElementById("assignmentSelect");
+    if (!assignments.length) {
+      sel.innerHTML = `<option value="">No assignments available yet</option>`;
+      return;
+    }
+    sel.innerHTML = `<option value="">— Select an assignment —</option>` +
+      assignments.map(a => `<option value="${a.id}">${a.title}</option>`).join("");
+  } catch(e) {
+    document.getElementById("assignmentSelect").innerHTML = `<option value="">Backend not running — start Flask</option>`;
+  }
+}
+
+// Show assignment info on select
+document.getElementById("assignmentSelect").addEventListener("change", function() {
+  const id = parseInt(this.value);
+  const box = document.getElementById("ainfo");
+  if (!id) { box.classList.remove("show"); return; }
+  const a = assignments.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById("aFaculty").textContent  = a.faculty_name || "—";
+  document.getElementById("aDeadline").textContent = a.deadline ? new Date(a.deadline).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : "No deadline";
+  document.getElementById("aDesc").textContent     = a.description || "No description provided.";
+  const d = (a.difficulty||"medium").toLowerCase();
+  const cls = {easy:"diff-easy",medium:"diff-medium",hard:"diff-hard"}[d]||"diff-medium";
+  document.getElementById("aDiff").innerHTML = `<span class="diff ${cls}">${a.difficulty||"Medium"}</span>`;
+  box.classList.add("show");
+});
+
+// File pick
+const pdfInput = document.getElementById("pdfFile");
+const fileName = document.getElementById("fileName");
+pdfInput.addEventListener("change", function() {
+  if (this.files[0]) { fileName.textContent = "✓  "+this.files[0].name; fileName.style.display="block"; }
+});
+const dz = document.getElementById("dropZone");
+dz.addEventListener("dragover", e=>{e.preventDefault();dz.classList.add("over");});
+dz.addEventListener("dragleave",()=>dz.classList.remove("over"));
+dz.addEventListener("drop",e=>{
+  e.preventDefault(); dz.classList.remove("over");
+  const f=e.dataTransfer.files[0];
+  if(f&&f.name.endsWith(".pdf")){ pdfInput.files=e.dataTransfer.files; fileName.textContent="✓  "+f.name; fileName.style.display="block"; }
+});
+
+// Step helpers
+function setstep(n, state, txt) {
+  const ic = document.getElementById("s"+n);
+  ic.className = "sicon "+state;
+  ic.textContent = state==="done"?"✓" : state==="err"?"✕" : state==="active"?"…" : n;
+  if(txt) document.getElementById("s"+n+"t").textContent = txt;
+}
+function showEl(id){document.getElementById(id).style.display="block";}
+function hideEl(id){document.getElementById(id).style.display="none";}
+function showCard(id){document.getElementById(id).classList.add("show");}
+function hideCard(id){document.getElementById(id).classList.remove("show");}
+
+// Main flow
+async function startEval() {
+  const aId  = document.getElementById("assignmentSelect").value;
+  const file = pdfInput.files[0];
+
+  if (!aId)  { alert("Please select an assignment."); return; }
+  if (!file) { alert("Please upload your PDF."); return; }
+  if (!file.name.toLowerCase().endsWith(".pdf")) { alert("Only PDF files accepted."); return; }
+
+  // Switch views
+  hideEl("formCard"); hideCard("errCard"); hideCard("resultCard");
+  showCard("progressCard");
+  [1,2,3,4].forEach(n=>setstep(n,"idle",null));
+
+  try {
+    // Step 1 — Upload submission
+    setstep(1,"active","Uploading your PDF to server...");
+    const fd = new FormData();
+    fd.append("assignment_id", aId);
+    fd.append("student_id", user.id);
+    fd.append("pdf", file);
+    const ur = await fetch(`${BASE_URL}/upload-submission`,{method:"POST",body:fd});
+    const ud = await ur.json();
+    if (!ud.success) throw new Error(ud.message||"Upload failed");
+    const subId = ud.submission_id;
+    setstep(1,"done","PDF uploaded & saved to database");
+
+    // Step 2 — visual only
+    setstep(2,"active","Extracting content from PDF pages...");
+    await new Promise(r=>setTimeout(r,700));
+    setstep(2,"done","Content extracted");
+
+    // Step 3 — AI eval
+    setstep(3,"active","Gemini AI is evaluating your work...");
+    const er = await fetch(`${BASE_URL}/evaluate-submission/${subId}`);
+    const ed = await er.json();
+    if (!ed.success) throw new Error(ed.message||"Evaluation failed");
+    setstep(3,"done","AI evaluation complete");
+
+    // Step 4 — save done (backend already saved)
+    setstep(4,"active","Saving results to database...");
+    await new Promise(r=>setTimeout(r,500));
+    setstep(4,"done","Results saved ✓");
+
+    // Show result
+    await new Promise(r=>setTimeout(r,600));
+    hideCard("progressCard");
+    showCard("resultCard");
+
+    document.getElementById("resultBody").textContent = ed.evaluation;
+
+    const sm = ed.evaluation.match(/score[:\s]+(\d{1,3})/i) || ed.evaluation.match(/(\d{1,3})\s*\/\s*100/);
+    if (sm) document.getElementById("scoreChip").textContent = sm[1]+" / 100";
+
+  } catch(err) {
+    console.error(err);
+    hideCard("progressCard");
+    document.getElementById("errTitle").textContent = "Evaluation Failed";
+    document.getElementById("errMsg").innerHTML = (err.message||"Unknown error")+"<br><br>Make sure Flask is running: <strong>python app.py</strong>";
+    showCard("errCard");
+  }
+}
+
+function resetForm() {
+  hideCard("progressCard"); hideCard("resultCard"); hideCard("errCard");
+  showEl("formCard");
+  pdfInput.value=""; fileName.style.display="none";
+  document.getElementById("assignmentSelect").value="";
+  document.getElementById("ainfo").classList.remove("show");
+  [1,2,3,4].forEach(n=>setstep(n,"idle",null));
+}
+
+loadAssignments();
+</script>
+</body>
+</html>
