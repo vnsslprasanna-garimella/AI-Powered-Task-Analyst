@@ -107,3 +107,34 @@ SmartEval/
     ├── style.css
     └── dashboard.css
 ```
+# SmartEval AI
+
+## 1. Login Page
+![Login Page](01-Login%20Page.jpeg)
+
+## 2. Faculty Sign In
+![Faculty Sign In](02-Faculty%20Sign%20In.jpeg)
+
+## 3. Student Registration
+![Student Registration](03-Student%20Registration.jpeg)
+
+## 4. Student Sign In
+![Student Sign In](04-Student%20Sign%20In.jpeg)
+
+## 5. Student Dashboard
+![Student Dashboard](05-Student%20Dashboard.jpeg)
+
+## 6. Assignments Page
+![Assignments](06-Assignments%20Page.jpeg)
+
+## 7. Student Submissions Page
+![Submissions](07-Student%20Submissions%20Page.jpeg)
+
+## 8. Assignment Submission Upload Page
+![Upload](08-Assignment%20Submission%20Upload%20Page.jpeg)
+
+## 9. Faculty Dashboard
+![Faculty Dashboard](09-Faculty%20Dashboard.jpeg)
+
+## 10. Faculty Student Submissions Review Page
+![Review](10-Faculty%20Student%20Submissions%20Review%20Page.jpeg)
